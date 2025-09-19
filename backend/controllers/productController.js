@@ -361,7 +361,17 @@ export const updateProduct = async (req, res) => {
 // Delete product
 export const deleteProduct = async (req, res) => {
   try {
+    console.log('Delete product request:', {
+      productId: req.params.id,
+      user: req.user,
+      session: {
+        userId: req.session?.userId,
+        userRole: req.session?.userRole
+      }
+    });
+
     if (!req.user || req.user.role !== 'artisan') {
+      console.log('Access denied for delete product:', { user: req.user });
       return res.status(403).json({ error: 'Access denied' });
     }
 
@@ -371,10 +381,15 @@ export const deleteProduct = async (req, res) => {
     });
 
     if (!product) {
+      console.log('Product not found for deletion:', { productId: req.params.id, artisanId: req.user._id });
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    res.json({ message: 'Product deleted successfully' });
+    console.log('Product deleted successfully:', product._id);
+    res.json({ 
+      success: true,
+      message: 'Product deleted successfully' 
+    });
   } catch (error) {
     console.error('Delete product error:', error);
     res.status(500).json({ error: 'Failed to delete product' });

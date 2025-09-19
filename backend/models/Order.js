@@ -197,7 +197,7 @@ orderSchema.pre('save', function(next) {
 // Indexes
 orderSchema.index({ customer: 1 });
 orderSchema.index({ 'items.artisan': 1 });
-orderSchema.index({ orderNumber: 1 });
+// orderNumber index is automatically created by unique: true
 orderSchema.index({ status: 1 });
 orderSchema.index({ createdAt: -1 });
 

@@ -175,7 +175,7 @@ chatSchema.statics.findOrCreateRoom = async function(participants, chatType = 'd
 };
 
 // Indexes
-chatSchema.index({ roomId: 1 });
+// roomId index is automatically created by unique: true
 chatSchema.index({ 'participants.user': 1 });
 chatSchema.index({ 'messages.sender': 1 });
 chatSchema.index({ 'messages.timestamp': -1 });

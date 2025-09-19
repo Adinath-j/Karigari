@@ -25,12 +25,12 @@ const ProductList = ({ products, onProductsChange }) => {
         throw new Error('Invalid product ID');
       }
       
-      // Use the centralized API client
-      const response = await apiClient.delete(`/products/${productId}/admin`);
+      // Use the regular delete endpoint for artisans to delete their own products
+      const response = await apiClient.delete(`/products/${productId}`);
       
       // Validate response
       if (!response?.data?.success) {
-        throw new Error('Failed to delete product');
+        throw new Error(response?.data?.error || 'Failed to delete product');
       }
       
       onProductsChange();
@@ -52,8 +52,6 @@ const ProductList = ({ products, onProductsChange }) => {
   };
 
   const handleStatusToggle = async (productId, currentStatus) => {
-    const newStatus = currentStatus === 'published' ? 'draft' : 'published';
-    
     try {
       // Show loading state
       const statusButton = document.querySelector(`[data-status="${productId}"]`);
@@ -62,13 +60,13 @@ const ProductList = ({ products, onProductsChange }) => {
         statusButton.classList.add('opacity-70', 'cursor-not-allowed');
       }
       
-      // Add validation for status update
-      if (!productId || !newStatus) {
+      // Add validation for product ID
+      if (!productId) {
         throw new Error('Invalid product data');
       }
       
-      // Use the centralized API client
-      const response = await apiClient.put(`/products/${productId}/status`, { status: newStatus });
+      // Use the new toggle-status endpoint for artisans
+      const response = await apiClient.put(`/products/${productId}/toggle-status`);
       
       // Validate response
       if (!response?.data?.product) {
@@ -76,7 +74,7 @@ const ProductList = ({ products, onProductsChange }) => {
       }
       
       onProductsChange();
-      alert(`Product ${newStatus === 'published' ? 'published' : 'saved as draft'} successfully`);
+      alert(response.data.message || 'Product status updated successfully');
     } catch (error) {
       console.error('Error updating product status:', error);
       alert('Failed to update product status. Please try again.');
@@ -199,6 +197,7 @@ const ProductList = ({ products, onProductsChange }) => {
               {/* Actions */}
               <div className="flex gap-2">
                 <button
+                  data-status={product._id}
                   onClick={() => handleStatusToggle(product._id, product.status)}
                   className={`flex-1 px-3 py-2 text-sm rounded-lg transition-colors ${
                     product.status === 'published'
