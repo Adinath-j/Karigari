@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import apiClient from '../../utils/api';
 
 const AdminDashboard = ({ user }) => {
   const [activeTab, setActiveTab] = useState('overview');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState({
+    stats: true,
+    artisans: true,
+    users: true,
+    products: true,
+    "product-moderation": true,
+    orders: true,
+    customizations: true
+  });
+  const [errors, setErrors] = useState({});
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalArtisans: 0,
@@ -22,41 +31,22 @@ const AdminDashboard = ({ user }) => {
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [customizationRequests, setCustomizationRequests] = useState([]);
-
-  useEffect(() => {
-    fetchStats();
-    if (activeTab === 'artisans') {
-      fetchPendingArtisans();
-    }
-    if (activeTab === 'users') {
-      fetchAllUsers();
-    }
-    if (activeTab === 'products') {
-      fetchProducts();
-    }
-    if (activeTab === 'product-moderation') {
-      fetchPendingProducts();
-    }
-    if (activeTab === 'orders') {
-      fetchOrders();
-    }
-    if (activeTab === 'customizations') {
-      fetchCustomizationRequests();
-    }
-  }, [activeTab]);
+  const [productCard, setProductCard] = useState(null);
 
   const fetchStats = async () => {
+    setLoading(prev => ({...prev, stats: true}));
     try {
       const [usersRes, productsRes, ordersRes] = await Promise.all([
-        axios.get('/users'),
-        axios.get('/products'),
-        axios.get('/orders').catch(() => ({ data: { orders: [] } })) // Fallback if orders not implemented
+        apiClient.get('/users'),
+        apiClient.get('/products'),
+        apiClient.get('/orders').catch(() => ({ data: { orders: [] } })) // Fallback if orders not implemented
       ]);
 
       const users = usersRes.data.users || [];
       const products = productsRes.data.products || [];
       const orders = ordersRes.data.orders || [];
-
+      
+      // Calculate stats
       const artisans = users.filter(u => u.role === 'artisan');
       const customers = users.filter(u => u.role === 'customer');
       const pending = artisans.filter(a => a.status === 'pending');
@@ -88,73 +78,120 @@ const AdminDashboard = ({ user }) => {
         activeCustomers: customers.filter(c => c.status === 'approved').length,
         popularCategories
       });
-      
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching stats:', error);
-      setLoading(false);
+      setErrors(prev => ({...prev, stats: 'Failed to load stats'}));
+    } finally {
+      setLoading(prev => ({...prev, stats: false}));
     }
   };
 
+  // Modify the fetch functions to handle errors better
   const fetchPendingArtisans = async () => {
+    setLoading(prev => ({...prev, artisans: true}));
     try {
-      const response = await axios.get('/users?role=artisan&status=pending');
+      const response = await apiClient.get('/users?role=artisan&status=pending');
       setPendingArtisans(response.data.users || []);
     } catch (error) {
       console.error('Error fetching pending artisans:', error);
+      setErrors(prev => ({...prev, artisans: 'Failed to load pending artisans'}));
+    } finally {
+      setLoading(prev => ({...prev, artisans: false}));
     }
   };
 
   const fetchAllUsers = async () => {
+    setLoading(prev => ({...prev, users: true}));
     try {
-      const response = await axios.get('/users');
+      const response = await apiClient.get('/users');
       setAllUsers(response.data.users || []);
     } catch (error) {
       console.error('Error fetching all users:', error);
+      setErrors(prev => ({...prev, users: 'Failed to load users'}));
+    } finally {
+      setLoading(prev => ({...prev, users: false}));
     }
   };
 
   const fetchProducts = async () => {
+    setLoading(prev => ({...prev, products: true}));
     try {
-      const response = await axios.get('/products');
+      const response = await apiClient.get('/products');
       setProducts(response.data.products || []);
     } catch (error) {
       console.error('Error fetching products:', error);
+      setErrors(prev => ({...prev, products: 'Failed to load products'}));
+    } finally {
+      setLoading(prev => ({...prev, products: false}));
     }
   };
 
   const fetchPendingProducts = async () => {
+    setLoading(prev => ({...prev, "product-moderation": true}));
     try {
-      const response = await axios.get('/products?status=pending');
+      const response = await apiClient.get('/products?status=pending');
       setPendingProducts(response.data.products || []);
     } catch (error) {
       console.error('Error fetching pending products:', error);
+      setErrors(prev => ({...prev, "product-moderation": 'Failed to load pending products'}));
+    } finally {
+      setLoading(prev => ({...prev, "product-moderation": false}));
     }
   };
 
   const fetchOrders = async () => {
+    setLoading(prev => ({...prev, orders: true}));
     try {
-      const response = await axios.get('/orders');
+      const response = await apiClient.get('/orders');
       setOrders(response.data.orders || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
-      setOrders([]); // Fallback to empty array
+      setErrors(prev => ({...prev, orders: 'Failed to load orders'}));
+    } finally {
+      setLoading(prev => ({...prev, orders: false}));
     }
   };
 
   const fetchCustomizationRequests = async () => {
+    setLoading(prev => ({...prev, customizations: true}));
     try {
-      const response = await axios.get('/customizations');
+      const response = await apiClient.get('/customizations');
       setCustomizationRequests(response.data.requests || []);
     } catch (error) {
       console.error('Error fetching customization requests:', error);
-      setCustomizationRequests([]); // Fallback to empty array
+      setErrors(prev => ({...prev, customizations: 'Failed to load customization requests'}));
+    } finally {
+      setLoading(prev => ({...prev, customizations: false}));
     }
   };
 
+  // Modify the useEffect hook
+  useEffect(() => {
+    fetchStats();
+    
+    // Only fetch data for the active tab if it hasn't been fetched yet
+    const fetchTabData = async () => {
+      if (activeTab === 'artisans') {
+        fetchPendingArtisans();
+      } else if (activeTab === 'users') {
+        fetchAllUsers();
+      } else if (activeTab === 'products') {
+        fetchProducts();
+      } else if (activeTab === 'product-moderation') {
+        fetchPendingProducts();
+      } else if (activeTab === 'orders') {
+        fetchOrders();
+      } else if (activeTab === 'customizations') {
+        fetchCustomizationRequests();
+      }
+    };
+    
+    fetchTabData();
+  }, [activeTab]);
+
   const handleApproveArtisan = async (userId) => {
     try {
-      await axios.put(`/users/${userId}/status`, { status: 'approved' });
+      await apiClient.put(`/users/${userId}/status`, { status: 'approved' });
       alert('Artisan approved successfully!');
       fetchPendingArtisans();
       fetchStats();
@@ -166,7 +203,7 @@ const AdminDashboard = ({ user }) => {
 
   const handleRejectArtisan = async (userId) => {
     try {
-      await axios.put(`/users/${userId}/status`, { status: 'rejected' });
+      await apiClient.put(`/users/${userId}/status`, { status: 'rejected' });
       alert('Artisan rejected');
       fetchPendingArtisans();
       fetchStats();
@@ -178,7 +215,7 @@ const AdminDashboard = ({ user }) => {
 
   const handleApproveProduct = async (productId) => {
     try {
-      await axios.put(`/products/${productId}/status`, { status: 'published' });
+      await apiClient.put(`/products/${productId}/status`, { status: 'published' });
       alert('Product approved and published!');
       fetchPendingProducts();
       fetchStats();
@@ -190,7 +227,7 @@ const AdminDashboard = ({ user }) => {
 
   const handleRejectProduct = async (productId, reason = '') => {
     try {
-      await axios.put(`/products/${productId}/status`, { 
+      await apiClient.put(`/products/${productId}/status`, { 
         status: 'rejected',
         rejectionReason: reason 
       });
@@ -208,7 +245,7 @@ const AdminDashboard = ({ user }) => {
       return;
     }
     try {
-      await axios.delete(`/products/${productId}`);
+      await apiClient.delete(`/products/${productId}/admin`);
       alert('Product removed successfully');
       fetchProducts();
       fetchStats();
@@ -218,7 +255,7 @@ const AdminDashboard = ({ user }) => {
     }
   };
 
-  if (loading) {
+  if (loading.stats) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-indigo-600"></div>
@@ -457,8 +494,8 @@ const AdminDashboard = ({ user }) => {
         {/* Artisan Approvals Tab */}
         {activeTab === 'artisans' && (
           <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">Artisan Approvals</h2>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Artisan Approvals</h2>
               <span className="text-gray-600 text-sm">
                 {pendingArtisans.length} pending approval(s)
               </span>
@@ -468,16 +505,16 @@ const AdminDashboard = ({ user }) => {
               <div className="space-y-4">
                 {pendingArtisans.map((artisan) => (
                   <div key={artisan._id} className="border border-gray-200 rounded-lg p-6">
-                    <div className="flex justify-between items-start">
+                    <div className="flex flex-col sm:flex-row sm:justify-between">
                       <div className="flex-1">
-                        <div className="flex items-center">
+                        <div className="flex items-center mb-2">
                           <h3 className="text-lg font-semibold text-gray-900">{artisan.name}</h3>
                           <span className="ml-3 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
                             Pending Review
                           </span>
                         </div>
                         <p className="text-gray-600 mt-1">{artisan.email}</p>
-                        <div className="mt-3 grid grid-cols-2 gap-4 text-sm">
+                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                           <div>
                             <span className="font-medium text-gray-700">Business Name:</span>
                             <p className="text-gray-600">{artisan.profile?.businessName || 'Not provided'}</p>
@@ -502,7 +539,7 @@ const AdminDashboard = ({ user }) => {
                           </div>
                         )}
                       </div>
-                      <div className="flex space-x-3 ml-6">
+                      <div className="flex space-x-3 mt-4 sm:mt-0">
                         <button
                           onClick={() => handleApproveArtisan(artisan._id)}
                           className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
@@ -581,7 +618,7 @@ const AdminDashboard = ({ user }) => {
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">"Discover Authentic Handmade Crafts"</p>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap gap-2">
                       <button className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 transition-colors">
                         Edit
                       </button>
@@ -599,7 +636,7 @@ const AdminDashboard = ({ user }) => {
                       </span>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">"Diwali Special - 20% Off on All Items"</p>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap gap-2">
                       <button className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors">
                         Approve
                       </button>
@@ -614,6 +651,279 @@ const AdminDashboard = ({ user }) => {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Product Card */}
+        {productCard && (
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">{productCard.title}</h3>
+            <div className="space-y-3">
+              {productCard.artisan && (
+                <div className="flex items-center">
+                  <span className="font-medium text-gray-700">Artisan:</span>
+                  <p className="text-gray-600 ml-2">{productCard.artisan.name}</p>
+                </div>
+              )}
+              <div className="flex items-center">
+                <span className="font-medium text-gray-700">Price:</span>
+                <p className="text-gray-600 ml-2">₹{productCard.price}</p>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-700">Category:</span>
+                <p className="text-gray-600 ml-2">{productCard.category}</p>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-700">Status:</span>
+                <p className="text-gray-600 ml-2">{productCard.status}</p>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-700">Stock:</span>
+                <p className="text-gray-600 ml-2">{productCard.stock}</p>
+              </div>
+              <div className="flex items-center">
+                <span className="font-medium text-gray-700">Sold:</span>
+                <p className="text-gray-600 ml-2">{productCard.sold}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Products Tab */}
+        {activeTab === 'products' && loading.products && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
+        )}
+
+        {activeTab === 'products' && !loading.products && products.length === 0 && (
+          <div className="bg-white p-6 rounded-lg shadow text-center">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No products found</h3>
+            <p className="text-gray-600">There are no products in the marketplace yet.</p>
+          </div>
+        )}
+
+        {activeTab === 'products' && !loading.products && products.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <div key={product._id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{product.title}</h3>
+                    <p className="text-sm text-gray-600">₹{product.price}</p>
+                  </div>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setProductCard(product)}
+                      className="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 transition-colors"
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() => handleRemoveProduct(product._id)}
+                      className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Product Moderation Tab */}
+        {activeTab === 'product-moderation' && loading["product-moderation"] && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
+        )}
+
+        {activeTab === 'product-moderation' && !loading["product-moderation"] && pendingProducts.length === 0 && (
+          <div className="bg-white p-6 rounded-lg shadow text-center">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No pending products</h3>
+            <p className="text-gray-600">There are no products awaiting moderation.</p>
+          </div>
+        )}
+
+        {activeTab === 'product-moderation' && !loading["product-moderation"] && pendingProducts.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {pendingProducts.map((product) => (
+              <div key={product._id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">{product.title}</h3>
+                    <p className="text-sm text-gray-600">₹{product.price}</p>
+                  </div>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => handleApproveProduct(product._id)}
+                      className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleRejectProduct(product._id)}
+                      className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 transition-colors"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Orders Tab */}
+        {activeTab === 'orders' && loading.orders && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
+        )}
+
+        {activeTab === 'orders' && !loading.orders && orders.length === 0 && (
+          <div className="bg-white p-6 rounded-lg shadow text-center">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
+            <p className="text-gray-600">There are no orders in the marketplace yet.</p>
+          </div>
+        )}
+
+        {activeTab === 'orders' && !loading.orders && orders.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {orders.map((order) => (
+              <div key={order._id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Order #{order._id}</h3>
+                    <p className="text-sm text-gray-600">₹{order.totalAmount}</p>
+                  </div>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setProductCard(order.product)}
+                      className="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 transition-colors"
+                    >
+                      View
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Customizations Tab */}
+        {activeTab === 'customizations' && loading.customizations && (
+          <div className="flex justify-center items-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+          </div>
+        )}
+
+        {activeTab === 'customizations' && !loading.customizations && customizationRequests.length === 0 && (
+          <div className="bg-white p-6 rounded-lg shadow text-center">
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No customization requests</h3>
+            <p className="text-gray-600">There are no customization requests at this time.</p>
+          </div>
+        )}
+
+        {activeTab === 'customizations' && !loading.customizations && customizationRequests.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {customizationRequests.map((request) => (
+              <div key={request._id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Request #{request._id}</h3>
+                    <p className="text-sm text-gray-600">Product: {request.product.title}</p>
+                  </div>
+                  <div className="flex space-x-3">
+                    <button
+                      onClick={() => setProductCard(request.product)}
+                      className="bg-indigo-600 text-white px-3 py-1 rounded text-sm hover:bg-indigo-700 transition-colors"
+                    >
+                      View
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Analytics Tab */}
+        {activeTab === 'analytics' && (
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Platform Analytics</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                  {loading.stats ? (
+                    <div className="animate-pulse">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 010 5.292M12 4.354a4 4 0 010 5.292M12 4.354v9.292m0-9.292a4 4 0 014 4m-4-4a4 4 0 01-4 4m4 4v2.5m-4-4v2.5"></path>
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-gray-600">{stats.totalUsers}</p>
+                          <h4 className="text-lg font-bold text-gray-900">Total Users</h4>
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <p className="text-sm text-gray-600">{stats.pendingApprovals} pending approvals</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Security Tab */}
+        {activeTab === 'security' && (
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">System Health</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                  {loading.stats ? (
+                    <div className="animate-pulse">
+                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                      <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-center">
+                        <div className="flex-shrink-0">
+                          <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 010 5.292M12 4.354a4 4 0 010 5.292M12 4.354v9.292m0-9.292a4 4 0 014 4m-4-4a4 4 0 01-4 4m4 4v2.5m-4-4v2.5"></path>
+                            </svg>
+                          </div>
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium text-gray-600">{stats.totalUsers}</p>
+                          <h4 className="text-lg font-bold text-gray-900">Total Users</h4>
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <p className="text-sm text-gray-600">{stats.pendingApprovals} pending approvals</p>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         )}

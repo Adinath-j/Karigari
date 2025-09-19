@@ -103,40 +103,43 @@ function App() {
         <Navbar user={user} onLogout={handleLogout} />
         
         <main className="min-h-screen">
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<HomePage user={user} />} />
-            <Route path="/products" element={<ProductsPage user={user} />} />
-            
-            {/* Auth Routes */}
-            <Route 
-              path="/login" 
-              element={
-                user ? <Navigate to="/dashboard" replace /> : 
-                <LoginPage onLogin={handleLogin} />
-              } 
-            />
-            <Route 
-              path="/register" 
-              element={
-                user ? <Navigate to="/dashboard" replace /> : 
-                <RegisterPage onLogin={handleLogin} />
-              } 
-            />
-            
-            {/* Protected Routes */}
-            <Route 
-              path="/dashboard" 
-              element={
-                <ProtectedRoute>
-                  <DashboardRoute />
-                </ProtectedRoute>
-              } 
-            />
-            
-            {/* Fallback Route */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+          {/* Add responsive container */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<HomePage user={user} />} />
+              <Route path="/products" element={<ProductsPage user={user} />} />
+              
+              {/* Auth Routes */}
+              <Route 
+                path="/login" 
+                element={
+                  user ? <Navigate to="/dashboard" replace /> : 
+                  <LoginPage onLogin={handleLogin} />
+                } 
+              />
+              <Route 
+                path="/register" 
+                element={
+                  user ? <Navigate to="/dashboard" replace /> : 
+                  <RegisterPage onLogin={handleLogin} />
+                } 
+              />
+              
+              {/* Protected Routes */}
+              <Route 
+                path="/dashboard" 
+                element={
+                  <ProtectedRoute>
+                    <DashboardRoute />
+                  </ProtectedRoute>
+                } 
+              />
+              
+              {/* Fallback Route */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
         </main>
       </div>
     </Router>

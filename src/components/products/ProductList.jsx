@@ -1,25 +1,53 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+// Replace axios with our centralized API client
+import apiClient from '../../utils/api';
 
 const ProductList = ({ products, onProductsChange }) => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Add validation for product deletion
   const handleDelete = async (productId) => {
-    if (!window.confirm('Are you sure you want to delete this product?')) {
+    if (!window.confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
       return;
     }
-
-    setIsDeleting(true);
+    
     try {
-      await axios.delete(`/api/products/${productId}`);
+      // Show loading state
+      const deleteButton = document.querySelector(`[data-delete="${productId}"]`);
+      if (deleteButton) {
+        deleteButton.disabled = true;
+        deleteButton.querySelector('svg').classList.add('animate-spin');
+      }
+      
+      // Add validation
+      if (!productId) {
+        throw new Error('Invalid product ID');
+      }
+      
+      // Use the centralized API client
+      const response = await apiClient.delete(`/products/${productId}/admin`);
+      
+      // Validate response
+      if (!response?.data?.success) {
+        throw new Error('Failed to delete product');
+      }
+      
       onProductsChange();
       alert('Product deleted successfully');
     } catch (error) {
       console.error('Error deleting product:', error);
-      alert('Failed to delete product');
+      alert('Failed to delete product. Please try again.');
     } finally {
-      setIsDeleting(false);
+      // Re-enable the button
+      const deleteButton = document.querySelector(`[data-delete="${productId}"]`);
+      if (deleteButton) {
+        deleteButton.disabled = false;
+        const spinner = deleteButton.querySelector('svg');
+        if (spinner) {
+          spinner.classList.remove('animate-spin');
+        }
+      }
     }
   };
 
@@ -27,12 +55,38 @@ const ProductList = ({ products, onProductsChange }) => {
     const newStatus = currentStatus === 'published' ? 'draft' : 'published';
     
     try {
-      await axios.put(`/api/products/${productId}`, { status: newStatus });
+      // Show loading state
+      const statusButton = document.querySelector(`[data-status="${productId}"]`);
+      if (statusButton) {
+        statusButton.disabled = true;
+        statusButton.classList.add('opacity-70', 'cursor-not-allowed');
+      }
+      
+      // Add validation for status update
+      if (!productId || !newStatus) {
+        throw new Error('Invalid product data');
+      }
+      
+      // Use the centralized API client
+      const response = await apiClient.put(`/products/${productId}/status`, { status: newStatus });
+      
+      // Validate response
+      if (!response?.data?.product) {
+        throw new Error('Failed to update product status');
+      }
+      
       onProductsChange();
       alert(`Product ${newStatus === 'published' ? 'published' : 'saved as draft'} successfully`);
     } catch (error) {
       console.error('Error updating product status:', error);
-      alert('Failed to update product status');
+      alert('Failed to update product status. Please try again.');
+    } finally {
+      // Re-enable the button
+      const statusButton = document.querySelector(`[data-status="${productId}"]`);
+      if (statusButton) {
+        statusButton.disabled = false;
+        statusButton.classList.remove('opacity-70', 'cursor-not-allowed');
+      }
     }
   };
 
