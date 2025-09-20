@@ -87,27 +87,41 @@ const HomePage = ({ user }) => {
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-green-50">
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20 pb-16">
-        <div className="text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
-            Discover Authentic
-            <span className="text-indigo-600 block">Handcrafted Art</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Connect with skilled artisans and discover unique, handcrafted products. 
-            From pottery to jewelry, each piece tells a story of traditional craftsmanship.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/products" className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors duration-200 text-lg px-8 py-3">
-              Explore Products
-            </Link>
-            {!user && (
-              <Link to="/register" className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg transition-colors duration-200 text-lg px-8 py-3">
-                Join as Artisan
+      {/* Hero Section with Image */}
+      <div className="relative bg-gradient-to-r from-indigo-600 to-purple-700 overflow-hidden">
+        {/* Hero Image Background */}
+        <div className="absolute inset-0 z-0">
+          <div className="bg-gray-200 overflow-hidden w-full h-full flex items-center justify-center">
+            <img 
+              src="src/assets/heroImg.png" 
+              alt="Traditional Indian artisan working on pottery wheel" 
+              className="w-full h-full object-cover rounded-lg"
+            />
+          </div>
+          <div className="absolute inset-0"></div>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-32">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+              Discover Authentic
+              <span className="block mt-2">Handcrafted Art</span>
+            </h1>
+            <p className="text-xl text-indigo-100 mb-8 max-w-3xl mx-auto">
+              Connect with skilled artisans and discover unique, handcrafted products.
+              From pottery to jewelry, each piece tells a story of traditional craftsmanship.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/products" className="bg-white text-indigo-600 hover:bg-gray-100 font-medium rounded-lg transition-colors duration-200 text-lg px-8 py-3 shadow-lg">
+                Explore Products
               </Link>
-            )}
+              {!user && (
+                <Link to="/register" className="bg-transparent border-2 border-white text-white hover:bg-white/10 font-medium rounded-lg transition-colors duration-200 text-lg px-8 py-3">
+                  Join as Artisan
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -263,7 +277,7 @@ const HomePage = ({ user }) => {
                     <p className="text-gray-600 text-sm mb-3 line-clamp-2">
                       {product.description}
                     </p>
-                    
+
                     {/* Price */}
                     <div className="flex items-center justify-between mb-3">
                       <span className="text-xl font-bold text-green-600">
@@ -281,20 +295,19 @@ const HomePage = ({ user }) => {
 
                     {/* Action Buttons */}
                     <div className="flex gap-2">
-                      <button 
+                      <button
                         onClick={() => handleViewProduct(product)}
                         className="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
                       >
                         View Details
                       </button>
                       {user && (
-                        <button 
+                        <button
                           onClick={() => handleFavoriteToggle(product._id)}
-                          className={`px-3 py-2 border rounded-lg transition-colors ${
-                            userFavorites.includes(product._id)
+                          className={`px-3 py-2 border rounded-lg transition-colors ${userFavorites.includes(product._id)
                               ? 'bg-red-50 border-red-300 text-red-600 hover:bg-red-100'
                               : 'border-gray-300 hover:bg-gray-50'
-                          }`}
+                            }`}
                         >
                           <svg className="w-4 h-4" fill={userFavorites.includes(product._id) ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -329,10 +342,10 @@ const HomePage = ({ user }) => {
             Ready to Start Your Journey?
           </h2>
           <p className="text-indigo-100 mb-8 max-w-2xl mx-auto">
-            Whether you're looking to buy unique handcrafted items or showcase your artisan skills, 
+            Whether you're looking to buy unique handcrafted items or showcase your artisan skills,
             Karigari is the perfect platform for you.
           </p>
-          
+
           {!user ? (
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/register?role=customer" className="bg-white text-indigo-600 hover:bg-gray-100 font-medium py-3 px-8 rounded-lg transition-colors">
@@ -349,7 +362,7 @@ const HomePage = ({ user }) => {
           )}
         </div>
       </div>
-      
+
       {/* Product Detail Modal */}
       <ProductDetailModal
         product={selectedProduct}
