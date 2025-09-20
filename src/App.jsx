@@ -23,6 +23,7 @@ function App() {
   const [error, setError] = useState(null);
 
   // Check for existing session on app load
+  // Note: 401 errors in console are expected when user is not logged in
   useEffect(() => {
     checkAuthStatus();
   }, []);
@@ -34,7 +35,7 @@ function App() {
         setUser(response.data.user);
       }
     } catch (error) {
-      // User not authenticated
+      // User not authenticated - this is expected behavior when there's no active session
       setUser(null);
     } finally {
       setLoading(false);
