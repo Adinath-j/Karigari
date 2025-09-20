@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import apiClient from '../../utils/api';
 
 const AdminDashboard = ({ user }) => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('users');
   const [loading, setLoading] = useState({
     stats: true,
     artisans: true,
@@ -175,6 +175,8 @@ const AdminDashboard = ({ user }) => {
         fetchPendingArtisans();
       } else if (activeTab === 'users') {
         fetchAllUsers();
+        // Also fetch pending artisans for the user management tab
+        fetchPendingArtisans();
       } else if (activeTab === 'products') {
         fetchProducts();
       } else if (activeTab === 'product-moderation') {
@@ -195,6 +197,7 @@ const AdminDashboard = ({ user }) => {
       alert('Artisan approved successfully!');
       fetchPendingArtisans();
       fetchStats();
+      fetchAllUsers(); // Refresh user list
     } catch (error) {
       console.error('Error approving artisan:', error);
       alert('Failed to approve artisan');
@@ -207,6 +210,7 @@ const AdminDashboard = ({ user }) => {
       alert('Artisan rejected');
       fetchPendingArtisans();
       fetchStats();
+      fetchAllUsers(); // Refresh user list
     } catch (error) {
       console.error('Error rejecting artisan:', error);
       alert('Failed to reject artisan');
@@ -299,15 +303,12 @@ const AdminDashboard = ({ user }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[
-            { id: 'overview', name: 'Overview', icon: '📊', description: 'Platform overview and key metrics' },
-            { id: 'artisans', name: 'Artisan Approvals', icon: '👨‍🎨', description: 'Review and approve artisan applications', badge: stats.pendingApprovals },
-            { id: 'users', name: 'User Management', icon: '👥', description: 'Manage all users and their accounts' },
+            { id: 'users', name: 'User Management', icon: '👥', description: 'Manage all users and their accounts', badge: stats.pendingApprovals },
             { id: 'product-moderation', name: 'Product Moderation', icon: '🔍', description: 'Review and moderate product listings', badge: stats.pendingProducts },
             { id: 'orders', name: 'Order Oversight', icon: '📦', description: 'Monitor and manage all orders' },
             { id: 'customizations', name: 'Customizations', icon: '🎨', description: 'Oversee customization requests' },
             { id: 'analytics', name: 'Platform Analytics', icon: '📈', description: 'View detailed platform analytics' },
-            { id: 'content', name: 'Content Management', icon: '📝', description: 'Manage featured content and banners' },
-            { id: 'security', name: 'System Health', icon: '🔒', description: 'Monitor system security and health' }
+            { id: 'content', name: 'Content Management', icon: '📝', description: 'Manage featured content and banners' }
           ].map((section) => (
             <div
               key={section.id}
@@ -354,216 +355,150 @@ const AdminDashboard = ({ user }) => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
 
-        {/* Overview Tab */}
-        {activeTab === 'overview' && (
+        {/* User Management Tab (now includes artisan approvals) */}
+        {activeTab === 'users' && (
           <div className="space-y-6">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Users</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.totalUsers}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Artisans</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.totalArtisans}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Products</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.totalProducts}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center">
-                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Pending Approvals</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.pendingApprovals}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Actions */}
+            {/* Artisan Approvals Section */}
             <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <button
-                  onClick={() => setActiveTab('artisans')}
-                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors text-center"
-                >
-                  <span className="text-2xl mb-2 block">👨‍🎨</span>
-                  <span className="font-medium text-gray-900">Approve Artisans</span>
-                  {stats.pendingApprovals > 0 && (
-                    <span className="block text-sm text-red-600 mt-1">
-                      {stats.pendingApprovals} pending
-                    </span>
-                  )}
-                </button>
-                <button
-                  onClick={() => setActiveTab('product-moderation')}
-                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors text-center"
-                >
-                  <span className="text-2xl mb-2 block">🔍</span>
-                  <span className="font-medium text-gray-900">Moderate Products</span>
-                  {stats.pendingProducts > 0 && (
-                    <span className="block text-sm text-red-600 mt-1">
-                      {stats.pendingProducts} pending
-                    </span>
-                  )}
-                </button>
-                <button
-                  onClick={() => setActiveTab('orders')}
-                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors text-center"
-                >
-                  <span className="text-2xl mb-2 block">📦</span>
-                  <span className="font-medium text-gray-900">Order Oversight</span>
-                  <span className="block text-sm text-gray-600 mt-1">
-                    {stats.totalOrders} total orders
-                  </span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('customizations')}
-                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors text-center"
-                >
-                  <span className="text-2xl mb-2 block">🎨</span>
-                  <span className="font-medium text-gray-900">Customizations</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('analytics')}
-                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors text-center"
-                >
-                  <span className="text-2xl mb-2 block">📈</span>
-                  <span className="font-medium text-gray-900">Analytics</span>
-                  <span className="block text-sm text-gray-600 mt-1">
-                    ₹{stats.totalRevenue.toLocaleString()} revenue
-                  </span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('content')}
-                  className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-indigo-500 hover:bg-indigo-50 transition-colors text-center"
-                >
-                  <span className="text-2xl mb-2 block">📝</span>
-                  <span className="font-medium text-gray-900">Content Management</span>
-                </button>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Artisan Approvals</h2>
+                <span className="text-gray-600 text-sm">
+                  {pendingArtisans.length} pending approval(s)
+                </span>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* Artisan Approvals Tab */}
-        {activeTab === 'artisans' && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 sm:mb-0">Artisan Approvals</h2>
-              <span className="text-gray-600 text-sm">
-                {pendingArtisans.length} pending approval(s)
-              </span>
-            </div>
-            
-            {pendingArtisans.length > 0 ? (
-              <div className="space-y-4">
-                {pendingArtisans.map((artisan) => (
-                  <div key={artisan._id} className="border border-gray-200 rounded-lg p-6">
-                    <div className="flex flex-col sm:flex-row sm:justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center mb-2">
-                          <h3 className="text-lg font-semibold text-gray-900">{artisan.name}</h3>
-                          <span className="ml-3 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
-                            Pending Review
-                          </span>
+              
+              {pendingArtisans.length > 0 ? (
+                <div className="space-y-4">
+                  {pendingArtisans.map((artisan) => (
+                    <div key={artisan._id} className="border border-gray-200 rounded-lg p-6">
+                      <div className="flex flex-col sm:flex-row sm:justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center mb-2">
+                            <h3 className="text-lg font-semibold text-gray-900">{artisan.name}</h3>
+                            <span className="ml-3 px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
+                              Pending Review
+                            </span>
+                          </div>
+                          <p className="text-gray-600 mt-1">{artisan.email}</p>
+                          <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <span className="font-medium text-gray-700">Business Name:</span>
+                              <p className="text-gray-600">{artisan.profile?.businessName || 'Not provided'}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Specialization:</span>
+                              <p className="text-gray-600">{artisan.profile?.specialization || 'Not provided'}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Experience:</span>
+                              <p className="text-gray-600">{artisan.profile?.experience || 'Not provided'}</p>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">Registered:</span>
+                              <p className="text-gray-600">{new Date(artisan.createdAt).toLocaleDateString()}</p>
+                            </div>
+                          </div>
+                          {artisan.profile?.bio && (
+                            <div className="mt-3">
+                              <span className="font-medium text-gray-700">Bio:</span>
+                              <p className="text-gray-600 text-sm mt-1">{artisan.profile.bio}</p>
+                            </div>
+                          )}
                         </div>
-                        <p className="text-gray-600 mt-1">{artisan.email}</p>
-                        <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="font-medium text-gray-700">Business Name:</span>
-                            <p className="text-gray-600">{artisan.profile?.businessName || 'Not provided'}</p>
-                          </div>
-                          <div>
-                            <span className="font-medium text-gray-700">Specialization:</span>
-                            <p className="text-gray-600">{artisan.profile?.specialization || 'Not provided'}</p>
-                          </div>
-                          <div>
-                            <span className="font-medium text-gray-700">Experience:</span>
-                            <p className="text-gray-600">{artisan.profile?.experience || 'Not provided'}</p>
-                          </div>
-                          <div>
-                            <span className="font-medium text-gray-700">Registered:</span>
-                            <p className="text-gray-600">{new Date(artisan.createdAt).toLocaleDateString()}</p>
-                          </div>
+                        <div className="flex space-x-3 mt-4 sm:mt-0">
+                          <button
+                            onClick={() => handleApproveArtisan(artisan._id)}
+                            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+                          >
+                            ✓ Approve
+                          </button>
+                          <button
+                            onClick={() => handleRejectArtisan(artisan._id)}
+                            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                          >
+                            ✗ Reject
+                          </button>
                         </div>
-                        {artisan.profile?.bio && (
-                          <div className="mt-3">
-                            <span className="font-medium text-gray-700">Bio:</span>
-                            <p className="text-gray-600 text-sm mt-1">{artisan.profile.bio}</p>
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex space-x-3 mt-4 sm:mt-0">
-                        <button
-                          onClick={() => handleApproveArtisan(artisan._id)}
-                          className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                          ✓ Approve
-                        </button>
-                        <button
-                          onClick={() => handleRejectArtisan(artisan._id)}
-                          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
-                        >
-                          ✗ Reject
-                        </button>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <span className="text-6xl mb-4 block">✓</span>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">All caught up!</h3>
-                <p className="text-gray-600">No pending artisan approvals at this time.</p>
-              </div>
-            )}
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <span className="text-6xl mb-4 block">✓</span>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">All caught up!</h3>
+                  <p className="text-gray-600">No pending artisan approvals at this time.</p>
+                </div>
+              )}
+            </div>
+
+            {/* All Users Section */}
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">All Users</h2>
+              
+              {allUsers.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          User
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Role
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Status
+                        </th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Joined
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {allUsers.map((user) => (
+                        <tr key={user._id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="ml-4">
+                                <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                                <div className="text-sm text-gray-500">{user.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              user.role === 'admin' ? 'bg-purple-100 text-purple-800' :
+                              user.role === 'artisan' ? 'bg-green-100 text-green-800' :
+                              'bg-blue-100 text-blue-800'
+                            }`}>
+                              {user.role}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                              user.status === 'approved' ? 'bg-green-100 text-green-800' :
+                              user.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {user.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {new Date(user.createdAt).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
+                  <p className="text-gray-600">There are no users in the system yet.</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -854,45 +789,6 @@ const AdminDashboard = ({ user }) => {
         {activeTab === 'analytics' && (
           <div className="bg-white p-6 rounded-lg shadow">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Platform Analytics</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-                  {loading.stats ? (
-                    <div className="animate-pulse">
-                      <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                      <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                          <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
-                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 010 5.292M12 4.354a4 4 0 010 5.292M12 4.354v9.292m0-9.292a4 4 0 014 4m-4-4a4 4 0 01-4 4m4 4v2.5m-4-4v2.5"></path>
-                            </svg>
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <p className="text-sm font-medium text-gray-600">{stats.totalUsers}</p>
-                          <h4 className="text-lg font-bold text-gray-900">Total Users</h4>
-                        </div>
-                      </div>
-                      <div className="mt-4">
-                        <p className="text-sm text-gray-600">{stats.pendingApprovals} pending approvals</p>
-                      </div>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Security Tab */}
-        {activeTab === 'security' && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">System Health</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
               {[1, 2, 3, 4].map((i) => (

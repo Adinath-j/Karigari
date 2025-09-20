@@ -41,7 +41,6 @@ const ArtisanDashboard = () => {
       const response = await axios.get('/products/artisan/my-products');
       setProducts(response.data.products);
       
-      // Calculate stats
       const published = response.data.products.filter(p => p.status === 'published').length;
       const drafts = response.data.products.filter(p => p.status === 'draft').length;
       const totalViews = response.data.products.reduce((sum, p) => sum + (p.statistics?.views || 0), 0);

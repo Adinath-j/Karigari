@@ -88,18 +88,14 @@ const HomePage = ({ user }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-green-50">
       {/* Hero Section with Image */}
-      <div className="relative bg-gradient-to-r from-indigo-600 to-purple-700 overflow-hidden">
+      <div className="relative bg-gradient-to-r from-indigo-600  to-purple-700 overflow-hidden">
         {/* Hero Image Background */}
-        <div className="absolute inset-0 z-0">
+        <div className="absolute inset-0 z-0 ">
           <div className="bg-gray-200 overflow-hidden w-full h-full flex items-center justify-center">
-            {/* Placeholder for hero image */}
-            <div className="text-center p-4">
-              <div className="text-5xl mb-4">🏺</div>
-              <h3 className="text-xl font-semibold text-gray-700">Handcrafted Art</h3>
-              <p className="text-gray-600 mt-2">Discover unique artisan products</p>
-            </div>
+            <img src="src/assets/heroImg.png" alt="heroImage" className="w-full h-full object-cover" />
+           
           </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/80 to-purple-700/80"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-amber-700/80 via-cyan-700/900  to-amber-700/80"></div>
         </div>
 
         <div className="relative z-10 max-w-full mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-32">
