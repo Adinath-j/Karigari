@@ -2,7 +2,9 @@ import axios from 'axios';
 
 // Create an instance with default settings
 const apiClient = axios.create({
-  baseURL: '/api', // Use relative path for Vite proxy
+  baseURL: process.env.NODE_ENV === 'production' 
+    ? 'your-backend-domain.com/api' 
+    : '/api', // Use relative path for Vite proxy in development
   withCredentials: true, // Important for cookie-based authentication
   headers: {
     'Content-Type': 'application/json',

@@ -1,558 +1,155 @@
 # Karigari - Handcrafted Marketplace Platform
 
-Karigari is a full-stack e-commerce platform designed to connect artisans with customers who appreciate handcrafted, unique products. The platform provides a marketplace where skilled artisans can showcase and sell their creations while customers can discover and purchase authentic handmade items.
+A marketplace platform for handcrafted products connecting artisans with customers.
 
 ## Table of Contents
-
-- [Project Overview](#project-overview)
-- [Key Features](#key-features)
+- [Features](#features)
 - [Technology Stack](#technology-stack)
 - [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Configuration](#configuration)
-- [Running the Application](#running-the-application)
+- [Setup Instructions](#setup-instructions)
 - [Default Credentials](#default-credentials)
-- [Project Structure](#project-structure)
-- [Database Schema](#database-schema)
-- [API Endpoints](#api-endpoints)
-- [Testing the API](#testing-the-api)
 - [Deployment](#deployment)
-- [Contributing](#contributing)
+- [Troubleshooting](#troubleshooting)
+- [API Testing](#api-testing)
 - [License](#license)
 
-## Project Overview
-
-Karigari is built with modern web technologies to provide a seamless experience for both artisans and customers. The platform includes:
-
-- **Frontend**: A responsive React application with intuitive user interfaces
-- **Backend**: A RESTful API built with Node.js and Express
-- **Database**: MongoDB for flexible data storage
-- **Authentication**: Session-based authentication with role-based access control
-
-The platform supports three main user roles:
-1. **Customers**: Browse products, place orders, and manage their purchases
-2. **Artisans**: Create and manage products, process orders, and interact with customers
-3. **Admins**: Moderate content, manage users, and oversee platform operations
-
-## Key Features
-
-### User Management
-- Role-based authentication (Customer, Artisan, Admin)
-- User registration and login
-- Profile management
-- Password security with bcrypt hashing
-
-### Product Management
-- Artisans can create, update, and delete products
-- Product categorization (Pottery, Textiles, Jewelry, etc.)
-- Image upload support
-- AI-generated product descriptions
-- Customization options for products
-
-### Order Management
-- Complete order lifecycle from placement to delivery
-- Status tracking (Pending, Confirmed, Processing, Shipped, Delivered)
-- Order history for customers and artisans
-- Tracking information for shipped orders
-
-### Marketplace Features
-- Product search and filtering
-- Category-based navigation
-- Favorite products functionality
-- Responsive design for all devices
+## Features
+- User authentication (customer, artisan, admin roles)
+- Product listing and management
+- Order management system
+- Customization requests
+- Real-time chat functionality
+- Responsive design with Tailwind CSS
 
 ## Technology Stack
-
-### Frontend
-- **React** - JavaScript library for building user interfaces
-- **React Router** - Declarative routing for React applications
-- **Tailwind CSS** - Utility-first CSS framework (v3.x)
-- **Axios** - Promise-based HTTP client
-- **Vite** - Fast build tool and development server
-
-### Backend
-- **Node.js** - JavaScript runtime environment
-- **Express.js** - Web application framework
-- **MongoDB** - NoSQL database
-- **Mongoose** - MongoDB object modeling tool
-- **Socket.IO** - Real-time communication library
-
-### Authentication & Security
-- **Express Session** - Session middleware
-- **Bcrypt** - Password hashing
-- **CORS** - Cross-Origin Resource Sharing handling
-
-### Development Tools
-- **ESLint** - Code linting
-- **Nodemon** - Development server with auto-restart
+- **Frontend**: React 18, Vite, Tailwind CSS, React Router
+- **Backend**: Node.js, Express.js, MongoDB with Mongoose
+- **Authentication**: Session-based with express-session
+- **Real-time**: Socket.IO for chat functionality
+- **Deployment**: Vercel (Frontend), Render (Backend)
 
 ## Prerequisites
+- Node.js v18 or higher
+- MongoDB (local or cloud instance)
+- npm or yarn package manager
 
-Before you begin, ensure you have the following installed:
-
-1. **Node.js** (v14 or higher)
-2. **npm** (v6 or higher) or **yarn**
-3. **MongoDB** (v4.4 or higher)
-4. **Git**
-
-## Installation
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/your-username/karigari.git
-cd karigari
-```
-
-### 2. Install Backend Dependencies
-
-```bash
-cd backend
-npm install
-```
-
-### 3. Install Frontend Dependencies
-
-```bash
-cd ..
-npm install
-```
-
-## Configuration
-
-### Environment Variables
-
-Create a `.env` file in the `backend` directory with the following variables:
-
-```env
-# Server Configuration
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/karigari
-SESSION_SECRET=your-session-secret-key
-
-# Optional: Production MongoDB URI
-# MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/karigari
-```
-
-### Tailwind CSS Setup
-
-The project uses Tailwind CSS v3 with the following configuration files:
-
-1. **tailwind.config.js** - Tailwind CSS configuration
-2. **postcss.config.js** - PostCSS configuration with Tailwind CSS and Autoprefixer plugins
-3. **src/index.css** - CSS entry point with Tailwind directives
-
-The CSS file should contain:
-```css
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-```
-
-### Database Setup
-
-1. Ensure MongoDB is running on your system
-2. The application will automatically create the necessary collections when first run
-3. For production, update the `MONGODB_URI` in your `.env` file
-
-## Running the Application
-
-### Development Mode
-
-#### Start the Backend Server
-
-```bash
-cd backend
-npm run dev
-```
-
-This will start the Express server on `http://localhost:5000` with nodemon for auto-restart on file changes.
-
-#### Start the Frontend Development Server
-
-```bash
-cd ..
-npm run dev
-```
-
-This will start the Vite development server on `http://localhost:5173` (or next available port like 5174, 5175, 5176, etc.).
-
-### Production Mode
-
-#### Build the Frontend
-
-```bash
-npm run build
-```
-
-#### Start the Backend Server
-
-```bash
-cd backend
-npm start
-```
-
-The application will be available at `http://localhost:5000`.
+## Setup Instructions
+1. Clone the repository
+2. Install dependencies for both frontend and backend:
+   ```bash
+   # Install frontend dependencies
+   npm install
+   
+   # Install backend dependencies
+   cd backend
+   npm install
+   cd ..
+   ```
+3. Create a `.env` file in the backend directory with the following variables:
+   ```env
+   PORT=5000
+   MONGODB_URI=your_mongodb_connection_string
+   SESSION_SECRET=your_session_secret_key
+   NODE_ENV=development
+   ```
+4. Start the development servers:
+   ```bash
+   # Start backend server
+   cd backend
+   npm run dev
+   
+   # Start frontend server (in a new terminal)
+   npm run dev
+   ```
 
 ## Default Credentials
+After running the setup script (`npm run setup-test-users`), you can use these credentials:
 
-For testing purposes, you can use the following credentials:
-
-### Admin User
-- **Email**: admin@karigari.com
-- **Password**: admin123
-
-### Customer User
-- **Email**: customer@test.com
-- **Password**: password123
-
-### Artisan User
-- **Email**: artisan@test.com
-- **Password**: password123
-
-To create the initial admin user, you can either:
-1. Use the registration form in the application, or
-2. Make a POST request to `/api/auth/create-admin` endpoint
-
-Note: The artisan account will have a "pending" status by default and needs to be approved by an admin.
-
-### Setting up Test Users
-
-To automatically create all test users, run the setup script:
-
-```bash
-cd backend
-npm run setup-test-users
-```
-
-This will create all three test users (admin, customer, artisan) if they don't already exist.
-
-## Troubleshooting
-
-### Login Issues
-
-If you're experiencing login issues, here are some common solutions:
-
-1. **Check if users exist in the database**:
-   - Run the test user setup script: `npm run setup-test-users` in the backend directory
-   - Or manually create users through the registration form
-
-2. **Verify the backend server is running**:
-   - Ensure the backend server is running on port 5000
-   - Check the terminal for any error messages
-
-3. **Check MongoDB connection**:
-   - Ensure MongoDB is running
-   - Verify the `MONGODB_URI` in your `.env` file
-
-4. **Clear browser cookies**:
-   - Sometimes session issues can cause login problems
-   - Clear your browser cookies for localhost
-
-5. **Check console for errors**:
-   - Open browser developer tools (F12) and check the Console tab for any JavaScript errors
-   - Check the Network tab to see if API requests are failing
-
-### Common Error Messages
-
-- **"Invalid email or password"**: 
-  - Verify you're using the correct credentials
-  - Check that the user exists in the database
-  
-- **"Your account has been suspended"**:
-  - Contact an administrator to reactivate your account
-  
-- **"Server error during login"**:
-  - Check the backend server logs for more details
-  - Verify MongoDB is running and accessible
-
-### Database Issues
-
-If you're having database connection issues:
-
-1. Ensure MongoDB is installed and running
-2. Check your `MONGODB_URI` in the `.env` file
-3. Verify that you can connect to MongoDB using a database tool like MongoDB Compass
-
-### Port Conflicts
-
-If you see "Port already in use" errors:
-
-1. Check if another instance of the server is running:
-   ```bash
-   # On Windows
-   netstat -ano | findstr :5000
-   
-   # On macOS/Linux
-   lsof -i :5000
-   ```
-
-2. Kill the process using the port or change the PORT in your `.env` file
-
-## Project Structure
-
-```
-karigari/
-├── backend/
-│   ├── controllers/          # Request handlers
-│   ├── middleware/           # Custom middleware functions
-│   ├── models/               # Database models
-│   ├── routes/               # API route definitions
-│   ├── uploads/              # Uploaded files (images)
-│   ├── .env                  # Environment variables
-│   ├── server.js             # Main server file
-│   ├── package.json          # Backend dependencies
-│   └── ...
-├── src/                      # Frontend source code
-│   ├── components/           # Reusable UI components
-│   ├── pages/                # Page components
-│   ├── utils/                # Utility functions
-│   ├── App.jsx               # Main application component
-│   ├── main.jsx              # Entry point
-│   └── ...
-├── public/                   # Static assets
-├── .gitignore                # Git ignore file
-├── package.json              # Frontend dependencies
-├── vite.config.js            # Vite configuration
-└── README.md                 # This file
-```
-
-## Database Schema
-
-### User Model
-
-```javascript
-{
-  name: String,
-  email: String,
-  password: String,
-  role: String, // 'customer', 'artisan', 'admin'
-  profile: {
-    avatar: String,
-    phone: String,
-    address: Object,
-    bio: String,
-    skills: [String],
-    experience: String,
-    socialLinks: Object
-  },
-  status: String, // 'pending', 'approved', 'rejected', 'suspended'
-  favorites: [ObjectId], // References to favorite products
-  stats: Object // User statistics
-}
-```
-
-### Product Model
-
-```javascript
-{
-  title: String,
-  description: String,
-  category: String,
-  price: Number,
-  stock: Number,
-  images: [String],
-  artisan: ObjectId, // Reference to User
-  materials: String,
-  customizable: Boolean,
-  customizationOptions: Object,
-  tags: [String],
-  status: String, // 'draft', 'published', 'pending', etc.
-  stats: Object // Product statistics
-}
-```
-
-### Order Model
-
-```javascript
-{
-  orderNumber: String,
-  customer: ObjectId, // Reference to User
-  items: [{
-    product: ObjectId, // Reference to Product
-    artisan: ObjectId, // Reference to User
-    quantity: Number,
-    price: Number,
-    customizations: Object,
-    status: String
-  }],
-  shippingAddress: Object,
-  billingAddress: Object,
-  pricing: Object,
-  payment: Object,
-  status: String, // 'pending', 'confirmed', 'processing', etc.
-  tracking: Object,
-  timeline: [Object] // Status history
-}
-```
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/me` - Get current user
-
-### Products
-- `GET /api/products` - Get all products
-- `GET /api/products/:id` - Get product by ID
-- `POST /api/products` - Create new product (Artisan only)
-- `PUT /api/products/:id` - Update product (Artisan only)
-- `DELETE /api/products/:id` - Delete product (Artisan only)
-
-### Orders
-- `GET /api/orders/customer/my-orders` - Get customer's orders
-- `GET /api/orders/artisan/my-orders` - Get artisan's orders
-- `PUT /api/orders/:id/status/artisan` - Update order status (Artisan only)
-- `PUT /api/orders/:id/status` - Update order status (Admin only)
-
-### Users
-- `GET /api/users/favorites` - Get user's favorite products
-- `POST /api/users/favorites` - Add product to favorites
-- `DELETE /api/users/favorites/:id` - Remove product from favorites
-
-## Testing the API
-
-You can test the API endpoints using curl commands or tools like Postman.
-
-### Authentication Endpoints
-
-1. **Create Admin User**:
-   ```bash
-   curl -X POST http://localhost:5000/api/auth/create-admin \
-     -H "Content-Type: application/json" \
-     -d '{"adminPassword": "admin123"}'
-   ```
-
-2. **Login**:
-   ```bash
-   curl -X POST http://localhost:5000/api/auth/login \
-     -H "Content-Type: application/json" \
-     -d '{"email": "admin@karigari.com", "password": "admin123"}'
-   ```
-
-3. **Get Current User**:
-   ```bash
-   curl http://localhost:5000/api/auth/me
-   ```
-
-### Product Endpoints
-
-1. **Get All Products**:
-   ```bash
-   curl http://localhost:5000/api/products
-   ```
-
-2. **Get Product by ID**:
-   ```bash
-   curl http://localhost:5000/api/products/{product-id}
-   ```
-
-### Order Endpoints
-
-1. **Get Customer Orders**:
-   ```bash
-   curl http://localhost:5000/api/orders/customer/my-orders
-   ```
-
-2. **Get Artisan Orders**:
-   ```bash
-   curl http://localhost:5000/api/orders/artisan/my-orders
-   ```
-
-Note: For endpoints that require authentication, you'll need to include the session cookie in your requests.
+- **Admin**: admin@karigari.com / admin123
+- **Customer**: customer@test.com / password123
+- **Artisan**: artisan@test.com / password123
 
 ## Deployment
 
-### Production Build
+### Frontend Deployment (Vercel)
+Frontend URL: https://karigari-ruddy.vercel.app
 
-1. Build the frontend:
+1. Push your code to a GitHub repository
+2. Sign up/log in to [Vercel](https://vercel.com)
+3. Create a new project and import your GitHub repository
+4. Configure the project settings:
+   - Framework Preset: Vite
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   - Install Command: `npm install`
+5. Add environment variables:
+   - `VITE_BACKEND_URL`: https://karigari-2xcq.onrender.com
+6. Deploy the project
+
+### Backend Deployment (Render)
+Backend URL: https://karigari-2xcq.onrender.com
+
+1. Push your code to a GitHub repository
+2. Sign up/log in to [Render](https://render.com)
+3. Create a new Web Service
+4. Connect your GitHub repository
+5. Configure the service:
+   - Name: karigari-backend
+   - Runtime: Node
+   - Build Command: `cd backend && npm install`
+   - Start Command: `cd backend && npm start`
+   - Plan: Free or paid as needed
+6. Add environment variables:
+   - `NODE_ENV`: production
+   - [PORT](file://c:\Users\adina\Desktop\Karigari\Karigari\backend\server.js#L34-L34): 10000
+   - `MONGODB_URL`: "mongodb+srv://adinathjadhavisdev_db_user:adinathjadhavisdev_db_user@karigari.hriqfwk.mongodb.net/?retryWrites=true&w=majority&appName=Karigari"
+   - `JWT_SECRET`: ksjdiugshd89gys87fgs883
+   - `FRONTEND_URL`: https://karigari-ruddy.vercel.app
+7. Deploy the service
+
+### Environment Variables
+For production deployment, make sure to set the following environment variables:
+
+**Frontend (Vercel):**
+- `VITE_BACKEND_URL`: https://karigari-2xcq.onrender.com
+
+**Backend (Render):**
+- `NODE_ENV`: production
+- [PORT](file://c:\Users\adina\Desktop\Karigari\Karigari\backend\server.js#L34-L34): 10000
+- `MONGODB_URL`: Your MongoDB connection string
+- `JWT_SECRET`: Your JWT secret
+- `FRONTEND_URL`: https://karigari-ruddy.vercel.app
+
+## Troubleshooting
+- **Login Issues**: If you can't log in, run the setup script to create test users:
+  ```bash
+  npm run setup-test-users
+  ```
+- **ESM Module Issues**: If you encounter ESM module errors, ensure your package.json has `"type": "module"`
+- **Port Conflicts**: If ports are in use, the application will automatically try different ports
+- **MongoDB Connection**: Ensure your MongoDB URI is correct and the database is accessible
+
+## API Testing
+You can test the API endpoints using tools like Postman or curl. Here are some example requests:
+
+1. **User Registration**:
    ```bash
-   npm run build
+   curl -X POST https://karigari-2xcq.onrender.com/api/auth/register \
+     -H "Content-Type: application/json" \
+     -d '{"name":"Test User","email":"test@example.com","password":"password123","role":"customer"}'
    ```
 
-2. Set environment variables for production in the backend `.env` file
-
-3. Start the production server:
+2. **User Login**:
    ```bash
-   cd backend
-   npm start
+   curl -X POST https://karigari-2xcq.onrender.com/api/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email":"test@example.com","password":"password123"}'
    ```
 
-### Hosting Options
-
-#### Backend
-- **Heroku**: Easy deployment with MongoDB add-on
-- **DigitalOcean App Platform**: Simple deployment process
-- **AWS Elastic Beanstalk**: Scalable deployment option
-
-#### Database
-- **MongoDB Atlas**: Cloud-hosted MongoDB service
-- **Self-hosted MongoDB**: On your own server
-
-#### Frontend
-- **Netlify**: For static frontend deployment
-- **Vercel**: React-optimized deployment platform
-- **GitHub Pages**: Free hosting for static sites
-
-### Environment Variables for Production
-
-```env
-# Server Configuration
-PORT=5000
-MONGODB_URI=your-production-mongodb-uri
-SESSION_SECRET=your-production-session-secret
-
-# Security
-NODE_ENV=production
-```
-
-## Contributing
-
-We welcome contributions to the Karigari project! Here's how you can help:
-
-### Development Workflow
-
-1. Fork the repository
-2. Create a feature branch:
+3. **Get Products**:
    ```bash
-   git checkout -b feature/your-feature-name
+   curl https://karigari-2xcq.onrender.com/api/products
    ```
-3. Make your changes
-4. Commit your changes:
-   ```bash
-   git commit -m "Add your feature description"
-   ```
-5. Push to your branch:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-6. Create a Pull Request
-
-### Code Style
-
-- Follow the existing code formatting
-- Use meaningful variable and function names
-- Write clear comments for complex logic
-- Ensure all tests pass before submitting
-
-### Reporting Issues
-
-If you find a bug or have a feature request, please open an issue on GitHub with:
-- A clear title and description
-- Steps to reproduce (for bugs)
-- Expected and actual behavior
-- Screenshots (if applicable)
 
 ## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## Support
-
-For additional help or questions about the Karigari platform, please contact the development team or open an issue on GitHub.
-
-Happy crafting!
+This project is licensed under the MIT License.

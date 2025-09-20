@@ -12,7 +12,7 @@
     "react",
     "nodejs"
   ],
-  "homepage": "https://github.com/your-username/karigari#readme",
+  "homepage": "https://karigari-ruddy.vercel.app",
   "bugs": {
     "url": "https://github.com/your-username/karigari/issues"
   },

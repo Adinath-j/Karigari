@@ -25,17 +25,21 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: process.env.NODE_ENV === 'production' 
+      ? [process.env.FRONTEND_URL || 'https://karigari-ruddy.vercel.app'] 
+      : ["http://localhost:5173", "http://localhost:5174"],
     methods: ["GET", "POST"]
   }
 });
 
-const PORT = process.env.PORT || 5000;
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/karigari';
+const PORT = process.env.PORT || 10000;
+const MONGODB_URI = process.env.MONGODB_URL || process.env.MONGODB_URI || 'mongodb://localhost:27017/karigari';
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
+  origin: process.env.NODE_ENV === 'production' 
+    ? [process.env.FRONTEND_URL || 'https://karigari-ruddy.vercel.app'] 
+    : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
   credentials: true
 }));
 
@@ -44,13 +48,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // Session configuration
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'karigari-secret-key',
+  secret: process.env.JWT_SECRET || process.env.SESSION_SECRET || 'karigari-secret-key',
   name: 'karigari.session', // Custom session name
   resave: false,
   saveUninitialized: false,
   rolling: true, // Reset expiry on activity
   cookie: {
-    secure: false, // Set to true in production with HTTPS
+    secure: process.env.NODE_ENV === 'production', // Set to true in production with HTTPS
     httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     sameSite: 'lax' // Add this for better cookie handling
@@ -68,29 +72,11 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/customizations', customizationRoutes);
 app.use('/api/chat', chatRoutes);
 
-// Socket.io for real-time chat
-io.on('connection', (socket) => {
-  console.log('User connected:', socket.id);
-
-  socket.on('join-room', (roomId) => {
-    socket.join(roomId);
-    console.log(`User ${socket.id} joined room ${roomId}`);
-  });
-
-  socket.on('send-message', (data) => {
-    socket.to(data.roomId).emit('receive-message', data);
-  });
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
-});
-
 // Connect to MongoDB
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
-    server.listen(PORT, () => {
+    server.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
     });
   })
