@@ -1,13 +1,32 @@
 {
-  "name": "qoder",
+  "name": "karigari",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "1.0.0",
+  "description": "A marketplace platform for handcrafted products connecting artisans with customers",
+  "keywords": [
+    "e-commerce",
+    "marketplace",
+    "handcrafted",
+    "artisans",
+    "react",
+    "nodejs"
+  ],
+  "homepage": "https://github.com/your-username/karigari#readme",
+  "bugs": {
+    "url": "https://github.com/your-username/karigari/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/karigari.git"
+  },
+  "license": "MIT",
+  "author": "Karigari Team",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "docs": "echo 'Generate documentation' && exit 0"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.8",

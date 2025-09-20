@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import ProductForm from '../../components/products/ProductForm';
 import ProductList from '../../components/products/ProductList';
+import ArtisanOrders from '../../components/orders/ArtisanOrders';
 
 const ArtisanDashboard = () => {
   const [user, setUser] = useState(null);
@@ -271,14 +272,7 @@ const ArtisanDashboard = () => {
         )}
 
         {activeTab === 'orders' && (
-          <div className="bg-white p-6 rounded-lg shadow">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Orders</h2>
-            <div className="text-center py-12">
-              <span className="text-6xl mb-4 block">📦</span>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
-              <p className="text-gray-600">Orders from customers will appear here.</p>
-            </div>
-          </div>
+          <ArtisanOrders />
         )}
 
         {activeTab === 'profile' && (
