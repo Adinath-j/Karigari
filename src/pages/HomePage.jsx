@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import ProductDetailModal from '../components/products/ProductDetailModal';
+import TestComponent from '../components/ui/TestComponent';
 
 const HomePage = ({ user }) => {
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -86,7 +87,7 @@ const HomePage = ({ user }) => {
     }).format(price);
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-green-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section with Image */}
       <div className="relative bg-gradient-to-r from-indigo-600  to-purple-700 overflow-hidden">
         {/* Hero Image Background */}
@@ -216,7 +217,7 @@ const HomePage = ({ user }) => {
               const categoryIcons = {
                 'Pottery': '🏺',
                 'Textiles': '🧵',
-                'Jewelry': '💍',
+                'Jewelry': 'ERING',
                 'Woodwork': '🪵',
                 'Metalcraft': '⚒️',
                 'Paintings': '🎨',

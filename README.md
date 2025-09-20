@@ -11,9 +11,11 @@ Karigari is a full-stack e-commerce platform designed to connect artisans with c
 - [Installation](#installation)
 - [Configuration](#configuration)
 - [Running the Application](#running-the-application)
+- [Default Credentials](#default-credentials)
 - [Project Structure](#project-structure)
 - [Database Schema](#database-schema)
 - [API Endpoints](#api-endpoints)
+- [Testing the API](#testing-the-api)
 - [Deployment](#deployment)
 - [Contributing](#contributing)
 - [License](#license)
@@ -64,7 +66,7 @@ The platform supports three main user roles:
 ### Frontend
 - **React** - JavaScript library for building user interfaces
 - **React Router** - Declarative routing for React applications
-- **Tailwind CSS** - Utility-first CSS framework
+- **Tailwind CSS** - Utility-first CSS framework (v3.x)
 - **Axios** - Promise-based HTTP client
 - **Vite** - Fast build tool and development server
 
@@ -132,6 +134,21 @@ SESSION_SECRET=your-session-secret-key
 # MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/karigari
 ```
 
+### Tailwind CSS Setup
+
+The project uses Tailwind CSS v3 with the following configuration files:
+
+1. **tailwind.config.js** - Tailwind CSS configuration
+2. **postcss.config.js** - PostCSS configuration with Tailwind CSS and Autoprefixer plugins
+3. **src/index.css** - CSS entry point with Tailwind directives
+
+The CSS file should contain:
+```css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
 ### Database Setup
 
 1. Ensure MongoDB is running on your system
@@ -158,7 +175,7 @@ cd ..
 npm run dev
 ```
 
-This will start the Vite development server on `http://localhost:5173` (or next available port).
+This will start the Vite development server on `http://localhost:5173` (or next available port like 5174, 5175, 5176, etc.).
 
 ### Production Mode
 
@@ -176,6 +193,101 @@ npm start
 ```
 
 The application will be available at `http://localhost:5000`.
+
+## Default Credentials
+
+For testing purposes, you can use the following credentials:
+
+### Admin User
+- **Email**: admin@karigari.com
+- **Password**: admin123
+
+### Customer User
+- **Email**: customer@test.com
+- **Password**: password123
+
+### Artisan User
+- **Email**: artisan@test.com
+- **Password**: password123
+
+To create the initial admin user, you can either:
+1. Use the registration form in the application, or
+2. Make a POST request to `/api/auth/create-admin` endpoint
+
+Note: The artisan account will have a "pending" status by default and needs to be approved by an admin.
+
+### Setting up Test Users
+
+To automatically create all test users, run the setup script:
+
+```bash
+cd backend
+npm run setup-test-users
+```
+
+This will create all three test users (admin, customer, artisan) if they don't already exist.
+
+## Troubleshooting
+
+### Login Issues
+
+If you're experiencing login issues, here are some common solutions:
+
+1. **Check if users exist in the database**:
+   - Run the test user setup script: `npm run setup-test-users` in the backend directory
+   - Or manually create users through the registration form
+
+2. **Verify the backend server is running**:
+   - Ensure the backend server is running on port 5000
+   - Check the terminal for any error messages
+
+3. **Check MongoDB connection**:
+   - Ensure MongoDB is running
+   - Verify the `MONGODB_URI` in your `.env` file
+
+4. **Clear browser cookies**:
+   - Sometimes session issues can cause login problems
+   - Clear your browser cookies for localhost
+
+5. **Check console for errors**:
+   - Open browser developer tools (F12) and check the Console tab for any JavaScript errors
+   - Check the Network tab to see if API requests are failing
+
+### Common Error Messages
+
+- **"Invalid email or password"**: 
+  - Verify you're using the correct credentials
+  - Check that the user exists in the database
+  
+- **"Your account has been suspended"**:
+  - Contact an administrator to reactivate your account
+  
+- **"Server error during login"**:
+  - Check the backend server logs for more details
+  - Verify MongoDB is running and accessible
+
+### Database Issues
+
+If you're having database connection issues:
+
+1. Ensure MongoDB is installed and running
+2. Check your `MONGODB_URI` in the `.env` file
+3. Verify that you can connect to MongoDB using a database tool like MongoDB Compass
+
+### Port Conflicts
+
+If you see "Port already in use" errors:
+
+1. Check if another instance of the server is running:
+   ```bash
+   # On Windows
+   netstat -ano | findstr :5000
+   
+   # On macOS/Linux
+   lsof -i :5000
+   ```
+
+2. Kill the process using the port or change the PORT in your `.env` file
 
 ## Project Structure
 
@@ -299,6 +411,57 @@ karigari/
 - `GET /api/users/favorites` - Get user's favorite products
 - `POST /api/users/favorites` - Add product to favorites
 - `DELETE /api/users/favorites/:id` - Remove product from favorites
+
+## Testing the API
+
+You can test the API endpoints using curl commands or tools like Postman.
+
+### Authentication Endpoints
+
+1. **Create Admin User**:
+   ```bash
+   curl -X POST http://localhost:5000/api/auth/create-admin \
+     -H "Content-Type: application/json" \
+     -d '{"adminPassword": "admin123"}'
+   ```
+
+2. **Login**:
+   ```bash
+   curl -X POST http://localhost:5000/api/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email": "admin@karigari.com", "password": "admin123"}'
+   ```
+
+3. **Get Current User**:
+   ```bash
+   curl http://localhost:5000/api/auth/me
+   ```
+
+### Product Endpoints
+
+1. **Get All Products**:
+   ```bash
+   curl http://localhost:5000/api/products
+   ```
+
+2. **Get Product by ID**:
+   ```bash
+   curl http://localhost:5000/api/products/{product-id}
+   ```
+
+### Order Endpoints
+
+1. **Get Customer Orders**:
+   ```bash
+   curl http://localhost:5000/api/orders/customer/my-orders
+   ```
+
+2. **Get Artisan Orders**:
+   ```bash
+   curl http://localhost:5000/api/orders/artisan/my-orders
+   ```
+
+Note: For endpoints that require authentication, you'll need to include the session cookie in your requests.
 
 ## Deployment
 

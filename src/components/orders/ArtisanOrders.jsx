@@ -5,6 +5,7 @@ import TrackingModal from './TrackingModal';
 const ArtisanOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isTrackingModalOpen, setIsTrackingModalOpen] = useState(false);
@@ -18,9 +19,11 @@ const ArtisanOrders = () => {
     try {
       const response = await axios.get('/orders/artisan/my-orders');
       setOrders(response.data.orders || []);
+      setError(null);
     } catch (error) {
       console.error('Error fetching orders:', error);
-      alert('Failed to fetch orders');
+      setError('Failed to fetch orders. Please try again later.');
+      setOrders([]); // Ensure orders is an empty array on error
     } finally {
       setLoading(false);
     }
@@ -159,6 +162,26 @@ const ArtisanOrders = () => {
     );
   }
 
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow p-8 text-center">
+        <div className="text-red-500 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Orders</h3>
+        <p className="text-gray-600 mb-4">{error}</p>
+        <button
+          onClick={fetchOrders}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+        >
+          Try Again
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -210,16 +233,16 @@ const ArtisanOrders = () => {
                       <div className="text-sm font-medium text-gray-900">#{order.orderNumber}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{order.customer.name}</div>
-                      <div className="text-sm text-gray-500">{order.customer.email}</div>
+                      <div className="text-sm text-gray-900">{order.customer?.name || 'Customer'}</div>
+                      <div className="text-sm text-gray-500">{order.customer?.email || 'N/A'}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {order.items.length} item{order.items.length > 1 ? 's' : ''}
+                        {order.items?.length || 0} item{order.items?.length !== 1 ? 's' : ''}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatPrice(order.pricing.total)}
+                      {order.pricing?.total ? formatPrice(order.pricing.total) : 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadgeClass(order.status)}`}>
@@ -227,7 +250,7 @@ const ArtisanOrders = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(order.createdAt)}
+                      {order.createdAt ? formatDate(order.createdAt) : 'N/A'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <button
@@ -288,7 +311,7 @@ const ArtisanOrders = () => {
                     Order #{selectedOrder.orderNumber}
                   </h3>
                   <p className="text-sm text-gray-500">
-                    Placed on {formatDate(selectedOrder.createdAt)}
+                    Placed on {selectedOrder.createdAt ? formatDate(selectedOrder.createdAt) : 'N/A'}
                   </p>
                 </div>
                 <button
@@ -312,14 +335,14 @@ const ArtisanOrders = () => {
                 <div>
                   <h4 className="text-sm font-medium text-gray-900 mb-2">Customer Information</h4>
                   <div className="bg-gray-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-900">{selectedOrder.customer.name}</p>
-                    <p className="text-sm text-gray-600">{selectedOrder.customer.email}</p>
+                    <p className="text-sm text-gray-900">{selectedOrder.customer?.name || 'Customer'}</p>
+                    <p className="text-sm text-gray-600">{selectedOrder.customer?.email || 'N/A'}</p>
                     <div className="mt-2 text-sm text-gray-600">
-                      <p>{selectedOrder.shippingAddress.name}</p>
-                      <p>{selectedOrder.shippingAddress.street}</p>
-                      <p>{selectedOrder.shippingAddress.city}, {selectedOrder.shippingAddress.state} {selectedOrder.shippingAddress.zipCode}</p>
-                      <p>{selectedOrder.shippingAddress.country}</p>
-                      <p className="mt-1">Phone: {selectedOrder.shippingAddress.phone}</p>
+                      <p>{selectedOrder.shippingAddress?.name || 'N/A'}</p>
+                      <p>{selectedOrder.shippingAddress?.street || 'N/A'}</p>
+                      <p>{selectedOrder.shippingAddress?.city || 'N/A'}, {selectedOrder.shippingAddress?.state || 'N/A'} {selectedOrder.shippingAddress?.zipCode || 'N/A'}</p>
+                      <p>{selectedOrder.shippingAddress?.country || 'N/A'}</p>
+                      <p className="mt-1">Phone: {selectedOrder.shippingAddress?.phone || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
@@ -328,10 +351,12 @@ const ArtisanOrders = () => {
                 <div>
                   <h4 className="text-sm font-medium text-gray-900 mb-2">Items</h4>
                   <div className="space-y-3">
-                    {selectedOrder.items.map((item, index) => (
+                    {selectedOrder.items && selectedOrder.items.map((item, index) => (
                       <div key={index} className="flex items-center border-b border-gray-200 pb-3">
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">{item.product.title}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {item.product ? item.product.title : 'Product not available'}
+                          </p>
                           <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                           {item.customizations && (
                             <div className="mt-1 text-xs text-gray-500">
@@ -344,7 +369,7 @@ const ArtisanOrders = () => {
                           )}
                         </div>
                         <div className="text-sm font-medium text-gray-900">
-                          {formatPrice(item.price * item.quantity)}
+                          {item.price ? formatPrice(item.price * item.quantity) : 'Price not available'}
                         </div>
                       </div>
                     ))}
@@ -357,25 +382,25 @@ const ArtisanOrders = () => {
                   <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Subtotal</span>
-                      <span>{formatPrice(selectedOrder.pricing.subtotal)}</span>
+                      <span>{selectedOrder.pricing?.subtotal ? formatPrice(selectedOrder.pricing.subtotal) : 'N/A'}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Shipping</span>
-                      <span>{formatPrice(selectedOrder.pricing.shipping)}</span>
+                      <span>{selectedOrder.pricing?.shipping ? formatPrice(selectedOrder.pricing.shipping) : 'N/A'}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Tax</span>
-                      <span>{formatPrice(selectedOrder.pricing.tax)}</span>
+                      <span>{selectedOrder.pricing?.tax ? formatPrice(selectedOrder.pricing.tax) : 'N/A'}</span>
                     </div>
-                    {selectedOrder.pricing.discount > 0 && (
+                    {selectedOrder.pricing?.discount > 0 && (
                       <div className="flex justify-between text-sm text-green-600">
                         <span>Discount</span>
-                        <span>-{formatPrice(selectedOrder.pricing.discount)}</span>
+                        <span>-{selectedOrder.pricing?.discount ? formatPrice(selectedOrder.pricing.discount) : 'N/A'}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-base font-medium border-t border-gray-200 pt-2">
                       <span>Total</span>
-                      <span>{formatPrice(selectedOrder.pricing.total)}</span>
+                      <span>{selectedOrder.pricing?.total ? formatPrice(selectedOrder.pricing.total) : 'N/A'}</span>
                     </div>
                   </div>
                 </div>
@@ -392,7 +417,7 @@ const ArtisanOrders = () => {
                           </div>
                           <div className="ml-3">
                             <p className="text-sm font-medium text-gray-900">{entry.status}</p>
-                            <p className="text-xs text-gray-500">{formatDate(entry.timestamp)}</p>
+                            <p className="text-xs text-gray-500">{entry.timestamp ? formatDate(entry.timestamp) : 'N/A'}</p>
                             {entry.note && <p className="text-xs text-gray-500 mt-1">{entry.note}</p>}
                           </div>
                         </div>

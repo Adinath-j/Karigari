@@ -4,6 +4,7 @@ import axios from 'axios';
 const CustomerOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -15,9 +16,11 @@ const CustomerOrders = () => {
     try {
       const response = await axios.get('/orders/customer/my-orders');
       setOrders(response.data.orders || []);
+      setError(null);
     } catch (error) {
       console.error('Error fetching orders:', error);
-      alert('Failed to fetch orders');
+      setError('Failed to fetch orders. Please try again later.');
+      setOrders([]); // Ensure orders is an empty array on error
     } finally {
       setLoading(false);
     }
@@ -68,6 +71,26 @@ const CustomerOrders = () => {
     return (
       <div className="flex justify-center items-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-lg shadow p-8 text-center">
+        <div className="text-red-500 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Error Loading Orders</h3>
+        <p className="text-gray-600 mb-4">{error}</p>
+        <button
+          onClick={fetchOrders}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -200,10 +223,12 @@ const CustomerOrders = () => {
                 <div>
                   <h4 className="text-sm font-medium text-gray-900 mb-2">Items</h4>
                   <div className="space-y-3">
-                    {selectedOrder.items.map((item, index) => (
+                    {selectedOrder.items && selectedOrder.items.map((item, index) => (
                       <div key={index} className="flex items-center border-b border-gray-200 pb-3">
                         <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-900">{item.product.title}</p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {item.product ? item.product.title : 'Product not available'}
+                          </p>
                           <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
                           {item.customizations && (
                             <div className="mt-1 text-xs text-gray-500">
@@ -216,7 +241,7 @@ const CustomerOrders = () => {
                           )}
                         </div>
                         <div className="text-sm font-medium text-gray-900">
-                          {formatPrice(item.price * item.quantity)}
+                          {item.price ? formatPrice(item.price * item.quantity) : 'Price not available'}
                         </div>
                       </div>
                     ))}
@@ -229,25 +254,25 @@ const CustomerOrders = () => {
                   <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Subtotal</span>
-                      <span>{formatPrice(selectedOrder.pricing.subtotal)}</span>
+                      <span>{selectedOrder.pricing?.subtotal ? formatPrice(selectedOrder.pricing.subtotal) : 'N/A'}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Shipping</span>
-                      <span>{formatPrice(selectedOrder.pricing.shipping)}</span>
+                      <span>{selectedOrder.pricing?.shipping ? formatPrice(selectedOrder.pricing.shipping) : 'N/A'}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Tax</span>
-                      <span>{formatPrice(selectedOrder.pricing.tax)}</span>
+                      <span>{selectedOrder.pricing?.tax ? formatPrice(selectedOrder.pricing.tax) : 'N/A'}</span>
                     </div>
-                    {selectedOrder.pricing.discount > 0 && (
+                    {selectedOrder.pricing?.discount > 0 && (
                       <div className="flex justify-between text-sm text-green-600">
                         <span>Discount</span>
-                        <span>-{formatPrice(selectedOrder.pricing.discount)}</span>
+                        <span>-{selectedOrder.pricing?.discount ? formatPrice(selectedOrder.pricing.discount) : 'N/A'}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-base font-medium border-t border-gray-200 pt-2">
                       <span>Total</span>
-                      <span>{formatPrice(selectedOrder.pricing.total)}</span>
+                      <span>{selectedOrder.pricing?.total ? formatPrice(selectedOrder.pricing.total) : 'N/A'}</span>
                     </div>
                   </div>
                 </div>
