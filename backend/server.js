@@ -84,6 +84,10 @@ io.on('connection', (socket) => {
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
+    // Start the server only after successful DB connection
+    server.listen(PORT, '0.0.0.0', () => {
+      console.log(`Server running on port ${PORT}`);
+    });
   })
   .catch((error) => {
     console.error('MongoDB connection error:', error);
@@ -91,10 +95,11 @@ mongoose.connect(MONGODB_URI)
 
 // Serve frontend in production
 if (process.env.NODE_ENV === 'production') {
-  const frontendBuildPath = path.join(__dirname, '../frontend/dist'); // adjust if your build folder is different
+  const frontendBuildPath = path.join(__dirname, '../frontend/dist'); // Adjust if your build folder is different
   app.use(express.static(frontendBuildPath));
 
-  app.get('/*', (req, res) => {
+  // Catch-all route for React Router
+  app.get(/^\/.*$/, (req, res) => {
     res.sendFile(path.join(frontendBuildPath, 'index.html'));
   });
 } else {
@@ -102,10 +107,5 @@ if (process.env.NODE_ENV === 'production') {
     res.send('API is running...');
   });
 }
-
-// Start the server
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on port ${PORT}`);
-});
 
 export { io };
