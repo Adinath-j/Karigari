@@ -3,11 +3,10 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  
+
   // Development server config
   server: {
     port: 5173,
-    // Optional proxy for local development only
     proxy: {
       '/api': {
         target: 'http://localhost:10000', // Local backend for dev
@@ -18,8 +17,8 @@ export default defineConfig({
   },
 
   build: {
-    outDir: 'dist',        // Build output folder
-    assetsDir: 'assets',   // Assets subfolder
+    outDir: 'dist',
+    assetsDir: 'assets',
     sourcemap: false,
     rollupOptions: {
       output: {
@@ -31,6 +30,6 @@ export default defineConfig({
     },
   },
 
-  // Production base path (Vercel static deployment)
+  // Production base path for Vercel
   base: '/',
 });
