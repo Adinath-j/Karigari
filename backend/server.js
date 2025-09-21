@@ -1,4 +1,4 @@
- import express from 'express';
+import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import session from 'express-session';
@@ -28,7 +28,7 @@ const PORT = process.env.PORT || 10000;
 const MONGODB_URI = process.env.MONGODB_URL || 'mongodb://localhost:27017/karigari';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-// Enable CORS
+// Enable CORS for frontend URLs
 app.use(cors({
   origin: [FRONTEND_URL, 'http://localhost:5173', 'http://localhost:5174'],
   credentials: true
@@ -38,7 +38,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session
+// Session Configuration
 app.use(session({
   secret: process.env.JWT_SECRET || 'karigari-secret-key',
   name: 'karigari.session',
@@ -53,7 +53,7 @@ app.use(session({
   }
 }));
 
-// Static files for uploads
+// Static uploads folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
@@ -63,17 +63,6 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/customizations', customizationRoutes);
 app.use('/api/chat', chatRoutes);
-
-// Serve React frontend in production
-if (process.env.NODE_ENV === 'production') {
-  const frontendPath = path.join(__dirname, '../dist'); // Adjust if dist is not one level up
-  app.use(express.static(frontendPath));
-
-  // Catch-all for React Router
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(frontendPath, 'index.html'));
-  });
-}
 
 // Socket.IO
 const io = new Server(server, {
@@ -86,7 +75,6 @@ const io = new Server(server, {
 
 io.on('connection', (socket) => {
   console.log('New client connected:', socket.id);
-
   socket.on('disconnect', () => {
     console.log('Client disconnected:', socket.id);
   });
@@ -96,12 +84,28 @@ io.on('connection', (socket) => {
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
-    server.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server running on port ${PORT}`);
-    });
   })
   .catch((error) => {
     console.error('MongoDB connection error:', error);
   });
+
+// Serve frontend in production
+if (process.env.NODE_ENV === 'production') {
+  const frontendBuildPath = path.join(__dirname, '../frontend/dist'); // adjust if your build folder is different
+  app.use(express.static(frontendBuildPath));
+
+  app.get('/*', (req, res) => {
+    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
+} else {
+  app.get('/', (req, res) => {
+    res.send('API is running...');
+  });
+}
+
+// Start the server
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 export { io };
