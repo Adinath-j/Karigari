@@ -1,10 +1,7 @@
 import axios from 'axios';
 
-// Determine backend URL based on environment
-const backendURL =
-  process.env.NODE_ENV === 'production'
-    ? 'https://karigari-2xcq.onrender.com/api' // Your deployed backend on Render
-    : 'http://localhost:10000/api'; // Local development backend
+// Use Vite environment variable
+const backendURL = import.meta.env.VITE_API_URL;
 
 // Create Axios instance
 const apiClient = axios.create({
@@ -17,7 +14,7 @@ const apiClient = axios.create({
 });
 
 // Development request logging
-if (process.env.NODE_ENV !== 'production') {
+if (import.meta.env.MODE !== 'production') {
   apiClient.interceptors.request.use(request => {
     console.log('%c[API Request]', 'color: blue; font-weight: bold;', request);
     return request;
@@ -28,10 +25,8 @@ if (process.env.NODE_ENV !== 'production') {
 apiClient.interceptors.response.use(
   response => response,
   error => {
-    // Extract meaningful error message
     const errorMessage = error.response?.data?.error || error.message;
 
-    // Handle different HTTP status codes
     if (error.response) {
       switch (error.response.status) {
         case 401:
@@ -51,7 +46,6 @@ apiClient.interceptors.response.use(
           }
       }
     } else {
-      // Network or CORS errors
       alert('Network error. Please check your connection.');
     }
 
