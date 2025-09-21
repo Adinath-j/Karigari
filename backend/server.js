@@ -1,4 +1,4 @@
-import express from 'express';
+ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import session from 'express-session';
@@ -26,9 +26,9 @@ const server = createServer(app);
 
 const PORT = process.env.PORT || 10000;
 const MONGODB_URI = process.env.MONGODB_URL || 'mongodb://localhost:27017/karigari';
-const FRONTEND_URL = process.env.FRONTEND_URL || 'https://karigari-ruddy.vercel.app';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
-// Enable CORS for frontend URLs
+// Enable CORS
 app.use(cors({
   origin: [FRONTEND_URL, 'http://localhost:5173', 'http://localhost:5174'],
   credentials: true
@@ -38,7 +38,7 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session Configuration
+// Session
 app.use(session({
   secret: process.env.JWT_SECRET || 'karigari-secret-key',
   name: 'karigari.session',
@@ -53,7 +53,7 @@ app.use(session({
   }
 }));
 
-// Static files
+// Static files for uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
@@ -63,6 +63,17 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/customizations', customizationRoutes);
 app.use('/api/chat', chatRoutes);
+
+// Serve React frontend in production
+if (process.env.NODE_ENV === 'production') {
+  const frontendPath = path.join(__dirname, '../dist'); // Adjust if dist is not one level up
+  app.use(express.static(frontendPath));
+
+  // Catch-all for React Router
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+  });
+}
 
 // Socket.IO
 const io = new Server(server, {
