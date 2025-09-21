@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-// Use Vite environment variable
-const backendURL = import.meta.env.VITE_API_URL;
+// Use Vite environment variable (must be defined in .env or Vercel dashboard)
+const backendURL = import.meta.env.VITE_API_URL || 'http://localhost:10000/api';
 
 // Create Axios instance
 const apiClient = axios.create({
@@ -13,7 +13,7 @@ const apiClient = axios.create({
   },
 });
 
-// Development request logging
+// Log requests in development only
 if (import.meta.env.MODE !== 'production') {
   apiClient.interceptors.request.use(request => {
     console.log('%c[API Request]', 'color: blue; font-weight: bold;', request);
@@ -21,7 +21,7 @@ if (import.meta.env.MODE !== 'production') {
   });
 }
 
-// Response interceptor for handling errors
+// Handle responses & errors
 apiClient.interceptors.response.use(
   response => response,
   error => {
@@ -46,6 +46,7 @@ apiClient.interceptors.response.use(
           }
       }
     } else {
+      // Network or CORS errors
       alert('Network error. Please check your connection.');
     }
 
