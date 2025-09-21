@@ -1,31 +1,36 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  
+  // Development server config
   server: {
     port: 5173,
+    // Optional proxy for local development only
     proxy: {
       '/api': {
-        target: 'http://localhost:5000', // Only used in development
+        target: 'http://localhost:10000', // Local backend for dev
         changeOrigin: true,
         secure: false,
-      }
-    }
+      },
+    },
   },
+
   build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
+    outDir: 'dist',        // Build output folder
+    assetsDir: 'assets',   // Assets subfolder
     sourcemap: false,
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
-          ui: ['@headlessui/react', '@heroicons/react']
-        }
-      }
-    }
+          ui: ['@headlessui/react', '@heroicons/react'],
+        },
+      },
+    },
   },
-  // For Vercel, always keep base as "/"
+
+  // Production base path (Vercel static deployment)
   base: '/',
-})
+});
