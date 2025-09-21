@@ -1,22 +1,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
     proxy: {
       '/api': {
-        target: process.env.NODE_ENV === 'production' 
-          ? process.env.VITE_BACKEND_URL || 'https://karigari-2xcq.onrender.com'
-          : 'http://localhost:5000',
+        target: 'http://localhost:5000', // Only used in development
         changeOrigin: true,
         secure: false,
       }
     }
   },
-  // Add build configuration for production
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -30,6 +26,6 @@ export default defineConfig({
       }
     }
   },
-  // Add base path for deployment
-  base: '/'
+  // For Vercel, always keep base as "/"
+  base: '/',
 })
