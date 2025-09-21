@@ -25,8 +25,8 @@ const app = express();
 const server = createServer(app);
 
 const PORT = process.env.PORT || 10000;
-const MONGODB_URI = process.env.MONGODB_URL || 'mongodb://localhost:27017/karigari';
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const MONGODB_URI = process.env.MONGODB_URL;
+const FRONTEND_URL = process.env.FRONTEND_URL;
 
 // Enable CORS for frontend URLs
 app.use(cors({
@@ -80,11 +80,10 @@ io.on('connection', (socket) => {
   });
 });
 
-// MongoDB Connection
+// MongoDB Connection and server start
 mongoose.connect(MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
-    // Start the server only after successful DB connection
     server.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
     });
@@ -93,19 +92,9 @@ mongoose.connect(MONGODB_URI)
     console.error('MongoDB connection error:', error);
   });
 
-// Serve frontend in production
-if (process.env.NODE_ENV === 'production') {
-  const frontendBuildPath = path.join(__dirname, '../frontend/dist'); // Adjust if your build folder is different
-  app.use(express.static(frontendBuildPath));
-
-  // Catch-all route for React Router
-  app.get(/^\/.*$/, (req, res) => {
-    res.sendFile(path.join(frontendBuildPath, 'index.html'));
-  });
-} else {
-  app.get('/', (req, res) => {
-    res.send('API is running...');
-  });
-}
+// Optional root route to check API
+app.get('/', (req, res) => {
+  res.send('Karigari API is running...');
+});
 
 export { io };
