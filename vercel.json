@@ -4,16 +4,10 @@
     {
       "src": "package.json",
       "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
+      "config": { "distDir": "dist" }
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "https://karigari-2xcq.onrender.com/api/$1"
-    },
     {
       "src": "/(.*)",
       "dest": "/index.html"
@@ -21,6 +15,6 @@
   ],
   "env": {
     "NODE_ENV": "production",
-    "VITE_BACKEND_URL": "https://karigari-2xcq.onrender.com"
+    "VITE_API_URL": "https://karigari-2xcq.onrender.com/api"
   }
 }
